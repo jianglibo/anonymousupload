@@ -1,6 +1,6 @@
 package com.m3958.apps.anonymousupload.unit;
 
-import com.m3958.apps.anonymousupload.PingVerticle;
+import com.m3958.apps.anonymousupload.AnonymousUploadServer;
 import org.junit.Test;
 
 /*
@@ -24,7 +24,7 @@ public class ExampleUnitTest {
 
   @Test
   public void testVerticle() {
-    PingVerticle vert = new PingVerticle();
+    AnonymousUploadServer vert = new AnonymousUploadServer();
 
     // do something with verticle
   }
