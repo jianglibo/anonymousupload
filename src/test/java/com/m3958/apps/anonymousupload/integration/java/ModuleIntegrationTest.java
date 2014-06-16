@@ -44,68 +44,105 @@ public class ModuleIntegrationTest extends TestVerticle {
   @Test
   public void testGetIndex() {
     HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
-    
+    container.logger().info(System.getProperty("user.dir"));
     client.getNow("/", new Handler<HttpClientResponse>() {
-        public void handle(HttpClientResponse resp) {
+      public void handle(final HttpClientResponse resp) {
 
-            final Buffer body = new Buffer(0);
+        final Buffer body = new Buffer(0);
 
-            resp.dataHandler(new Handler<Buffer>() {
-                public void handle(Buffer data) {
-                    body.appendBuffer(data);
-                }
-            });
-            resp.endHandler(new VoidHandler() {
-                public void handle() {
-                   // The entire response body has been received
-                   Assert.assertEquals(17, body.length());
-                   Assert.assertEquals("hello web server.", body.toString());
-                   testComplete();
-                }
-            });
-        }
+        resp.dataHandler(new Handler<Buffer>() {
+          public void handle(Buffer data) {
+            body.appendBuffer(data);
+          }
+        });
+        resp.endHandler(new VoidHandler() {
+          public void handle() {
+            // The entire response body has been received
+            container.logger().info(body.toString("UTF-8"));
+            Assert.assertEquals(17, body.length());
+            Assert.assertEquals("hello web server.", body.toString());
+            Assert.assertEquals("text/html; charset=UTF-8",resp.headers().get("Content-Type"));
+            testComplete();
+          }
+        });
+      }
+    });
+  }
+
+  @Test
+  public void testGetChinese() {
+    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
+
+    client.getNow("/web/chinese.html", new Handler<HttpClientResponse>() {
+      public void handle(final HttpClientResponse resp) {
+
+        final Buffer body = new Buffer(0);
+
+        resp.dataHandler(new Handler<Buffer>() {
+          public void handle(Buffer data) {
+            body.appendBuffer(data);
+          }
+        });
+        resp.endHandler(new VoidHandler() {
+          public void handle() {
+            // The entire response body has been received
+            Assert.assertEquals(15, body.length());
+            Assert.assertEquals("你好，中文", body.toString());
+            Assert.assertEquals("text/html; charset=UTF-8",resp.headers().get("Content-Type"));
+            testComplete();
+          }
+        });
+      }
     });
   }
   
   @Test
-  public void testGetChinese() {
+  public void testOthers() {
     HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
-    
-    client.getNow("/chinese.html", new Handler<HttpClientResponse>() {
-        public void handle(HttpClientResponse resp) {
 
-            final Buffer body = new Buffer(0);
+    client.getNow("/web/README.md", new Handler<HttpClientResponse>() {
+      public void handle(final HttpClientResponse resp) {
 
-            resp.dataHandler(new Handler<Buffer>() {
-                public void handle(Buffer data) {
-                    body.appendBuffer(data);
-                }
-            });
-            resp.endHandler(new VoidHandler() {
-                public void handle() {
-                   // The entire response body has been received
-                   Assert.assertEquals(15, body.length());
-                   Assert.assertEquals("你好，中文", body.toString());
-                   testComplete();
-                }
-            });
-        }
+        final Buffer body = new Buffer(0);
+
+        resp.dataHandler(new Handler<Buffer>() {
+          public void handle(Buffer data) {
+            body.appendBuffer(data);
+          }
+        });
+        resp.endHandler(new VoidHandler() {
+          public void handle() {
+            // The entire response body has been received
+            Assert.assertEquals("text/html",resp.headers().get("Content-Type"));
+            testComplete();
+          }
+        });
+      }
     });
+  }
+  
+  @Test
+  public void tt(){
+    testComplete();
   }
 
   @Override
   public void start() {
-    // Make sure we call initialize() - this sets up the assert stuff so assert functionality works
+    // Make sure we call initialize() - this sets up the assert stuff so
+    // assert functionality works
     // correctly
     initialize();
-    // Deploy the module - the System property `vertx.modulename` will contain the name of the
+    // Deploy the module - the System property `vertx.modulename` will
+    // contain the name of the
     // module so you
     // don't have to hardecode it in your tests
+    container.logger().info(System.getProperty("vertx.modulename"));
     container.deployModule(System.getProperty("vertx.modulename"),
         new AsyncResultHandler<String>() {
           @Override
           public void handle(AsyncResult<String> asyncResult) {
-            // Deployment is asynchronous and this this handler will be called when it's complete
+            // Deployment is asynchronous and this this handler will
+            // be called when it's complete
             // (or failed)
             assertTrue(asyncResult.succeeded());
             assertNotNull("deploymentID should not be null", asyncResult.result());
