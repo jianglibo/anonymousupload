@@ -1,5 +1,7 @@
 package com.m3958.apps.anonymousupload;
 
+import java.nio.file.Paths;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.Vertx;
@@ -14,53 +16,69 @@ import com.m3958.apps.anonymousupload.util.Utils;
 
 public class PostFileHandler implements Handler<HttpServerRequest> {
 
-	public static String availableChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@.-~";
+  public static String availableChar =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@.-~";
 
-	public static char[] chars = new char[67];
+  public static char[] chars = new char[67];
 
-	static {
-		for (int i = 0; i < 67; i++) {
-			chars[i] = availableChar.charAt(i);
-		}
-	}
+  static {
+    for (int i = 0; i < 67; i++) {
+      chars[i] = availableChar.charAt(i);
+    }
+  }
 
-	private Logger logger;
+  private Logger logger;
 
-	private FileSystem fileSystem;
-	private String assetRoot;
+  private FileSystem fileSystem;
 
-	public PostFileHandler(Vertx vertx,Logger logger,String assetRoot) {
-		this.logger = logger;
-		this.fileSystem = vertx.fileSystem();
-		this.assetRoot = assetRoot;
-	}
+  private String assetRoot;
 
-	/**
-	 * curl --form upload=@localfilename --form press=OK localhost
-	 */
-	@Override
-	public void handle(final HttpServerRequest request) {
-		request.expectMultiPart(true);
-		final HttpServerResponse response = request.response();
-		final String host = request.headers().get("Host");
+  public PostFileHandler(Vertx vertx, Logger logger, String assetRoot) {
+    this.logger = logger;
+    this.fileSystem = vertx.fileSystem();
+    this.assetRoot = assetRoot;
+  }
 
-		final StringBuilder sb = new StringBuilder();
-		request.uploadHandler(new Handler<HttpServerFileUpload>() {
-			public void handle(HttpServerFileUpload upload) {
-				String rs = RandomStringUtils.random(7, chars)
-						+ Utils.getFileExtWithDot(upload.filename());
-				upload.streamToFileSystem("web/" + rs);
-				sb.append("http://").append(host).append("/").append(rs)
-						.append("\n");
-			}
-		});
+  /**
+   * curl --form upload=@localfilename --form press=OK localhost
+   */
+  @Override
+  public void handle(final HttpServerRequest request) {
+    request.expectMultiPart(true);
+    final HttpServerResponse response = request.response();
+    final String host = request.headers().get("Host");
 
-		request.endHandler(new VoidHandler() {
-			public void handle() {
-				response.putHeader("content-type", "text/plain");
-				response.end(sb.toString());
-			}
-		});
-	}
+    final StringBuilder sb = new StringBuilder();
+
+    request.uploadHandler(new Handler<HttpServerFileUpload>() {
+      public void handle(HttpServerFileUpload upload) {
+        String rs = RandomStringUtils.random(7, chars) + Utils.getFileExtWithDot(upload.filename());
+        upload.streamToFileSystem(Paths.get(assetRoot, rs).toString());
+        sb.append("http://").append(host).append("/").append(rs).append("\n");
+      }
+    });
+
+    // request.uploadHandler(new Handler<HttpServerFileUpload>() {
+    // public void handle(HttpServerFileUpload upload) {
+    // String rs = RandomStringUtils.random(7, chars) + Utils.getFileExtWithDot(upload.filename());
+    // String fn = Paths.get(assetRoot, rs).toString();
+    // upload.dataHandler(new Handler<Buffer>() {
+    // @Override
+    // public void handle(Buffer event) {
+    //
+    //
+    // }});
+    //
+    // sb.append("http://").append(host).append("/").append(rs).append("\n");
+    // }
+    // });
+
+    request.endHandler(new VoidHandler() {
+      public void handle() {
+        response.putHeader("content-type", "text/plain");
+        response.end(sb.toString());
+      }
+    });
+  }
 
 }

@@ -36,11 +36,11 @@ public class AnonymousUploadServer extends WebServerBase {
   }
 
   private Handler<HttpServerRequest> getWebFileHandler() {
-    return new WebFileHandler(vertx, container.logger(), "web", "index.html");
+    return new WebFileHandlerAsync(vertx, container.logger(),"index.html");
   }
 
   private Handler<HttpServerRequest> getAssetFileHandler() {
     String assetRoot = config.getString("asset_root", "asset/");
-    return new AssetFileHandler(vertx, container.logger(), assetRoot, "", false, false);
+    return new AssetFileHandler(vertx, container.logger(), assetRoot, false, false);
   }
 }
