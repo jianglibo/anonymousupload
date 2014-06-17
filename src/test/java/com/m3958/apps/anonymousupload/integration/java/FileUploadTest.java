@@ -22,15 +22,12 @@ import static org.vertx.testtools.VertxAssert.testComplete;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URISyntaxException;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,7 +46,7 @@ import org.vertx.testtools.TestVerticle;
 public class FileUploadTest extends TestVerticle {
 
   @Test
-  public void testPostOne() throws ClientProtocolException, IOException {
+  public void testPostOne() throws ClientProtocolException, IOException, URISyntaxException {
 
     File f = new File("README.md");
 
@@ -58,7 +55,11 @@ public class FileUploadTest extends TestVerticle {
 
     String c =
         Request
-            .Post("http://localhost")
+            .Post(new URIBuilder()
+            .setScheme("http")
+            .setHost("localhost")
+            .setPort(8080)
+            .build())
             .body(
                 MultipartEntityBuilder.create()
                     .addBinaryBody("afile", f, ContentType.MULTIPART_FORM_DATA, f.getName())

@@ -43,7 +43,7 @@ public class ModuleIntegrationTest extends TestVerticle {
 
   @Test
   public void testGetIndex() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
+    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
     container.logger().info(System.getProperty("user.dir"));
     client.getNow("/", new Handler<HttpClientResponse>() {
       public void handle(final HttpClientResponse resp) {
@@ -71,7 +71,7 @@ public class ModuleIntegrationTest extends TestVerticle {
 
   @Test
   public void testGetChinese() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
+    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
 
     client.getNow("/web/chinese.html", new Handler<HttpClientResponse>() {
       public void handle(final HttpClientResponse resp) {
@@ -98,7 +98,7 @@ public class ModuleIntegrationTest extends TestVerticle {
   
   @Test
   public void testOthers() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(80);
+    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
 
     client.getNow("/web/README.md", new Handler<HttpClientResponse>() {
       public void handle(final HttpClientResponse resp) {
