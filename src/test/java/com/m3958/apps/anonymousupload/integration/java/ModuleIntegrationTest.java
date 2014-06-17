@@ -20,6 +20,18 @@ import static org.vertx.testtools.VertxAssert.assertNotNull;
 import static org.vertx.testtools.VertxAssert.assertTrue;
 import static org.vertx.testtools.VertxAssert.testComplete;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
@@ -31,6 +43,10 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.testtools.TestVerticle;
 
+import com.google.common.io.CharSource;
+import com.google.common.io.CharStreams;
+import com.google.common.io.InputSupplier;
+
 /**
  * Example Java integration test that deploys the module that this project builds.
  * 
@@ -41,88 +57,157 @@ import org.vertx.testtools.TestVerticle;
  */
 public class ModuleIntegrationTest extends TestVerticle {
 
+  // @Test
+  // public void testGetIndex() {
+  // HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
+  // container.logger().info(System.getProperty("user.dir"));
+  // client.getNow("/", new Handler<HttpClientResponse>() {
+  // public void handle(final HttpClientResponse resp) {
+  //
+  // final Buffer body = new Buffer(0);
+  //
+  // resp.dataHandler(new Handler<Buffer>() {
+  // public void handle(Buffer data) {
+  // body.appendBuffer(data);
+  // }
+  // });
+  // resp.endHandler(new VoidHandler() {
+  // public void handle() {
+  // // The entire response body has been received
+  // container.logger().info(body.toString("UTF-8"));
+  // Assert.assertEquals(17, body.length());
+  // Assert.assertEquals("hello web server.", body.toString());
+  // Assert.assertEquals("text/html; charset=UTF-8",resp.headers().get("Content-Type"));
+  // testComplete();
+  // }
+  // });
+  // }
+  // });
+  // }
+
   @Test
-  public void testGetIndex() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
-    container.logger().info(System.getProperty("user.dir"));
-    client.getNow("/", new Handler<HttpClientResponse>() {
-      public void handle(final HttpClientResponse resp) {
+  public void testGetIndex() throws ClientProtocolException, IOException, URISyntaxException {
 
-        final Buffer body = new Buffer(0);
+    File f = new File("README.md");
 
-        resp.dataHandler(new Handler<Buffer>() {
-          public void handle(Buffer data) {
-            body.appendBuffer(data);
-          }
-        });
-        resp.endHandler(new VoidHandler() {
-          public void handle() {
-            // The entire response body has been received
-            container.logger().info(body.toString("UTF-8"));
-            Assert.assertEquals(17, body.length());
-            Assert.assertEquals("hello web server.", body.toString());
-            Assert.assertEquals("text/html; charset=UTF-8",resp.headers().get("Content-Type"));
-            testComplete();
-          }
-        });
-      }
-    });
+    Assert.assertTrue(f.exists());
+
+
+    HttpResponse r =
+        Request.Get(new URIBuilder().setScheme("http").setHost("localhost").setPort(8080).build())
+            .execute().returnResponse();
+
+    String c =
+        CharStreams.toString(new InputStreamReader(r.getEntity().getContent(), Charset
+            .forName("UTF-8")));
+    container.logger().info(c);
+    Assert.assertEquals(17, c.length());
+    Assert.assertEquals("hello web server.", c);
+    Assert.assertEquals("text/html; charset=UTF-8", r.getEntity().getContentType().getValue());
+    testComplete();
+  }
+
+  // @Test
+  // public void testGetChinese() {
+  // HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
+  //
+  // client.getNow("/web/chinese.html", new Handler<HttpClientResponse>() {
+  // public void handle(final HttpClientResponse resp) {
+  //
+  // final Buffer body = new Buffer(0);
+  //
+  // resp.dataHandler(new Handler<Buffer>() {
+  // public void handle(Buffer data) {
+  // body.appendBuffer(data);
+  // }
+  // });
+  // resp.endHandler(new VoidHandler() {
+  // public void handle() {
+  // // The entire response body has been received
+  // Assert.assertEquals(15, body.length());
+  // Assert.assertEquals("你好，中文", body.toString());
+  // Assert.assertEquals("text/html; charset=UTF-8", resp.headers().get("Content-Type"));
+  // testComplete();
+  // }
+  // });
+  // }
+  // });
+  // }
+
+  public void testGetChinese() throws ClientProtocolException, IOException, URISyntaxException {
+
+    File f = new File("README.md");
+
+    Assert.assertTrue(f.exists());
+
+
+    HttpResponse r =
+        Request
+            .Get(
+                new URIBuilder().setScheme("http").setHost("localhost")
+                    .setPath("/web/chinese.html").setPort(8080).build()).execute().returnResponse();
+
+    String c =
+        CharStreams.toString(new InputStreamReader(r.getEntity().getContent(), Charset
+            .forName("UTF-8")));
+
+    container.logger().info(c);
+
+    Assert.assertEquals(15, c.length());
+    Assert.assertEquals("你好，中文", c);
+    Assert.assertEquals("text/html; charset=UTF-8", r.getEntity().getContentType().getValue());
+
+    testComplete();
+
+  }
+
+  // @Test
+  // public void testOthers() {
+  // HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
+  //
+  // client.getNow("/web/README.md", new Handler<HttpClientResponse>() {
+  // public void handle(final HttpClientResponse resp) {
+  //
+  // final Buffer body = new Buffer(0);
+  //
+  // resp.dataHandler(new Handler<Buffer>() {
+  // public void handle(Buffer data) {
+  // body.appendBuffer(data);
+  // }
+  // });
+  // resp.endHandler(new VoidHandler() {
+  // public void handle() {
+  // // The entire response body has been received
+  // Assert.assertEquals("text/html", resp.headers().get("Content-Type"));
+  // testComplete();
+  // }
+  // });
+  // }
+  // });
+  // }
+
+
+  public void testOthers() throws ClientProtocolException, IOException, URISyntaxException {
+
+    File f = new File("README.md");
+
+    Assert.assertTrue(f.exists());
+
+
+    HttpResponse r =
+        Request
+            .Get(
+                new URIBuilder().setScheme("http").setHost("localhost").setPath("/web/README.md")
+                    .setPort(8080).build()).execute().returnResponse();
+
+    Assert.assertEquals("text/html", r.getEntity().getContentType().getValue());
+
+    testComplete();
+
   }
 
   @Test
-  public void testGetChinese() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
-
-    client.getNow("/web/chinese.html", new Handler<HttpClientResponse>() {
-      public void handle(final HttpClientResponse resp) {
-
-        final Buffer body = new Buffer(0);
-
-        resp.dataHandler(new Handler<Buffer>() {
-          public void handle(Buffer data) {
-            body.appendBuffer(data);
-          }
-        });
-        resp.endHandler(new VoidHandler() {
-          public void handle() {
-            // The entire response body has been received
-            Assert.assertEquals(15, body.length());
-            Assert.assertEquals("你好，中文", body.toString());
-            Assert.assertEquals("text/html; charset=UTF-8",resp.headers().get("Content-Type"));
-            testComplete();
-          }
-        });
-      }
-    });
-  }
-  
-  @Test
-  public void testOthers() {
-    HttpClient client = vertx.createHttpClient().setHost("localhost").setPort(8080);
-
-    client.getNow("/web/README.md", new Handler<HttpClientResponse>() {
-      public void handle(final HttpClientResponse resp) {
-
-        final Buffer body = new Buffer(0);
-
-        resp.dataHandler(new Handler<Buffer>() {
-          public void handle(Buffer data) {
-            body.appendBuffer(data);
-          }
-        });
-        resp.endHandler(new VoidHandler() {
-          public void handle() {
-            // The entire response body has been received
-            Assert.assertEquals("text/html",resp.headers().get("Content-Type"));
-            testComplete();
-          }
-        });
-      }
-    });
-  }
-  
-  @Test
-  public void tt(){
+  public void tt() {
     testComplete();
   }
 
