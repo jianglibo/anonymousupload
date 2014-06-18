@@ -13,6 +13,10 @@ public class AnonymousUpload extends Verticle {
     if (config.toMap().isEmpty()) {
       String js = Utils.readResouce("/conf.json");
       config = new JsonObject(js);
+      String assetPath = config.getString("asset_root", "asset");
+      if (!vertx.fileSystem().existsSync(assetPath)) {
+        vertx.fileSystem().mkdirSync(assetPath);
+      }
     }
     container.deployVerticle("com.m3958.apps.anonymousupload.AnonymousUploadServer", config, 1);
   }
