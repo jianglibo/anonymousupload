@@ -65,11 +65,15 @@ public class FileUploadTest extends TestVerticle {
                     .addBinaryBody("afile", f, ContentType.MULTIPART_FORM_DATA, f.getName())
                     .build()).execute().returnContent().asString();
 
-
-    Assert.assertTrue(c.trim().endsWith(".md"));
+    String url = c.trim();
+    Assert.assertTrue(url.endsWith(".md"));
+    
+    
+    String cc = Request.Get(url).execute().returnContent().asString();
+    Assert.assertTrue(cc.contains("vertx runmod"));
+    
     testComplete();
   }
-
 
 
   @Override
