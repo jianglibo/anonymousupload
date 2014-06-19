@@ -1,5 +1,5 @@
   {
-    "asset_root": "asset",
+    "asset_root": "/assetdata",
     "index_page": "index.html",
     "host": "0.0.0.0",
     "port": 80,
