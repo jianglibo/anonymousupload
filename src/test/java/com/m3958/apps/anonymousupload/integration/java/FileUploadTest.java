@@ -74,6 +74,59 @@ public class FileUploadTest extends TestVerticle {
     
     testComplete();
   }
+  
+  @Test
+  public void testPostRename() throws ClientProtocolException, IOException, URISyntaxException {
+
+    File f = new File("README.md");
+
+    Assert.assertTrue(f.exists());
+
+
+    String c =
+        Request
+            .Post(new URIBuilder()
+            .setScheme("http")
+            .setHost("localhost")
+            .setPort(8080)
+            .build())
+            .body(
+                MultipartEntityBuilder.create()
+                    .addBinaryBody("afile", f, ContentType.MULTIPART_FORM_DATA, f.getName())
+                    .addTextBody("fn", "abcfn.md")
+                    .build()).execute().returnContent().asString();
+
+    String url = c.trim();
+    Assert.assertTrue(url.endsWith("abcfn.md"));
+
+    testComplete();
+  }
+  
+  @Test
+  public void testPostNone() throws ClientProtocolException, IOException, URISyntaxException {
+
+    File f = new File("README.md");
+
+    Assert.assertTrue(f.exists());
+
+
+    String c =
+        Request
+            .Post(new URIBuilder()
+            .setScheme("http")
+            .setHost("localhost")
+            .setPort(8080)
+            .build())
+            .body(
+                MultipartEntityBuilder.create()
+                    .addTextBody("fn", "abcfn.md")
+                    .build()).execute().returnContent().asString();
+
+    String url = c.trim();
+    Assert.assertEquals("1",url);
+
+    testComplete();
+  }
 
 
   @Override

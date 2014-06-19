@@ -31,7 +31,7 @@ public class AssetFileHandler extends StaticFileHandler {
     if (fileSystem.existsSync(p.toString())) {
       super.handle(req);
     } else {
-      //redirect to other url.
+      req.response().end("File Not Found!");
     }
   }
 }
